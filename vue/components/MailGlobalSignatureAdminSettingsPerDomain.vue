@@ -2,48 +2,19 @@
   <q-scroll-area class="full-height full-width">
     <div class="q-pa-lg">
       <div class="row q-mb-md">
-        <div class="col text-h5">{{$t('MAILDOMAINSGLOBALSIGNATURE.HEADING_USER_GLOBAL_SIGNATURE_SETTINGS') }}</div>
+        <div class="col text-h5">{{$t('MAILDOMAINSGLOBALSIGNATURE.HEADING_DOMAIN_GLOBAL_SIGNATURE_SETTINGS') }}</div>
       </div>
       <q-card flat bordered class="card-edit-settings">
         <q-card-section>
           <div class="row q-mb-md">
             <div class="col-2">
               <div class="q-my-sm">
-                {{ $t('MAILDOMAINSGLOBALSIGNATURE.LABEL_NAME') }}
+                {{ $t('MAILDOMAINSGLOBALSIGNATURE.LABEL_SIGNATURE') }}
               </div>
             </div>
             <div class="col-4">
-              <q-input outlined dense class="col-4" bg-color="white" v-model="name"/>
-            </div>
-          </div>
-          <div class="row q-mb-md">
-            <div class="col-2">
-              <div class="q-my-sm">
-                {{ $t('MAILDOMAINSGLOBALSIGNATURE.LABEL_POSITION') }}
-              </div>
-            </div>
-            <div class="col-4">
-              <q-input outlined dense class="col-4" bg-color="white" v-model="position"/>
-            </div>
-          </div>
-          <div class="row q-mb-md">
-            <div class="col-2">
-              <div class="q-my-sm">
-                {{ $t('MAILDOMAINSGLOBALSIGNATURE.LABEL_PHONE') }}
-              </div>
-            </div>
-            <div class="col-4">
-              <q-input outlined dense class="col-4" bg-color="white" v-model="phone"/>
-            </div>
-          </div>
-          <div class="row q-mb-md">
-            <div class="col-2">
-              <div class="q-my-sm">
-                {{ $t('MAILDOMAINSGLOBALSIGNATURE.LABEL_EMAIL') }}
-              </div>
-            </div>
-            <div class="col-4">
-              <q-input outlined dense class="col-4" bg-color="white" v-model="email"/>
+              <q-select outlined dense bg-color="white" v-model="selectedSignature"
+                        emit-value map-options :options="signatureOptions" option-label="name" />
             </div>
           </div>
         </q-card-section>
@@ -70,11 +41,16 @@ import webApi from 'src/utils/web-api'
 import cache from 'src/cache'
 
 export default {
-  name: 'MailGlobalSignatureAdminSettingsPerUser',
+  name: 'MailGlobalSignatureAdminSettingsPerDomain',
 
   data () {
     return {
-      user: null,
+      selectedSignature: 0,
+      signatureOptions: [
+        { name: this.$t('MAILDOMAINSGLOBALSIGNATURE.LABEL_SIGNATURE_NOT_SELECTED'), value: 0 }
+      ],
+
+      domain: null,
       name: '',
       position: '',
       phone: '',
@@ -84,6 +60,12 @@ export default {
     }
   },
 
+  computed: {
+    currentTenantId() {
+      return this.$store.getters['tenants/getCurrentTenantId']
+    },
+  },
+
   watch: {
     $route(to, from) {
       this.parseRoute()
@@ -91,6 +73,7 @@ export default {
   },
 
   mounted() {
+    this.$store.dispatch('tenants/completeTenantData', this.tenant.id)
     this.parseRoute()
   },
 
@@ -104,10 +87,10 @@ export default {
      */
     hasChanges () {
       const
-        name = _.isFunction(this.user?.getData) ? this.user?.getData('MailDomainsGlobalSignature::Name') : '',
-        position = _.isFunction(this.user?.getData) ? this.user?.getData('MailDomainsGlobalSignature::Position') : '',
-        phone = _.isFunction(this.user?.getData) ? this.user?.getData('MailDomainsGlobalSignature::Phone') : '',
-        email = _.isFunction(this.user?.getData) ? this.user?.getData('MailDomainsGlobalSignature::Email') : ''
+        name = _.isFunction(this.domain?.getData) ? this.domain?.getData('MailDomainsGlobalSignature::Name') : '',
+        position = _.isFunction(this.domain?.getData) ? this.domain?.getData('MailDomainsGlobalSignature::Position') : '',
+        phone = _.isFunction(this.domain?.getData) ? this.domain?.getData('MailDomainsGlobalSignature::Phone') : '',
+        email = _.isFunction(this.domain?.getData) ? this.domain?.getData('MailDomainsGlobalSignature::Email') : ''
       return this.name !== name || this.position !== position || this.phone !== phone || this.email !== email
     },
 
@@ -117,15 +100,15 @@ export default {
      * !! hasChanges method must return true after executing revertChanges method
      */
     revertChanges () {
-      this.populateUserData()
+      this.populateDomainData()
     },
 
-    populateUserData () {
-      if (_.isFunction(this.user?.getData)) {
-        this.name = this.user?.getData('MailDomainsGlobalSignature::Name')
-        this.position = this.user?.getData('MailDomainsGlobalSignature::Position')
-        this.phone = this.user?.getData('MailDomainsGlobalSignature::Phone')
-        this.email = this.user?.getData('MailDomainsGlobalSignature::Email')
+    populateDomainData () {
+      if (_.isFunction(this.domain?.getData)) {
+        this.name = this.domain?.getData('MailDomainsGlobalSignature::Name')
+        this.position = this.domain?.getData('MailDomainsGlobalSignature::Position')
+        this.phone = this.domain?.getData('MailDomainsGlobalSignature::Phone')
+        this.email = this.domain?.getData('MailDomainsGlobalSignature::Email')
       } else {
         this.name = ''
         this.position = ''
@@ -135,26 +118,32 @@ export default {
     },
 
     parseRoute () {
-      const userId = typesUtils.pPositiveInt(this.$route?.params?.id)
-      if (this.user?.id !== userId) {
-        this.user = {
-          id: userId,
-        }
-        this.populate()
-      }
+      const domainId = typesUtils.pPositiveInt(this.$route?.params?.id)
+      const domain = this.$store.getters['maildomains/getDomain'](this.currentTenantId, domainId)
+      // if (domain) {
+      //   this.fillUp(domain)
+      // } else {
+      //   this.$emit('no-domain-found')
+      // }
+      // if (this.domain?.id !== domainId) {
+      //   this.domain = {
+      //     id: domainId,
+      //   }
+      //   this.populate()
+      // }
     },
 
     populate () {
       this.loading = true
       const currentTenantId = this.$store.getters['tenants/getCurrentTenantId']
-      cache.getUser(currentTenantId, this.user.id).then(({ user, userId }) => {
-        if (userId === this.user.id) {
+      cache.getDomain(currentTenantId, this.domain.id).then(({ domain, domainId }) => {
+        if (domainId === this.domain.id) {
           this.loading = false
-          if (user && _.isFunction(user?.getData)) {
-            this.user = user
-            this.populateUserData()
+          if (domain && _.isFunction(domain?.getData)) {
+            this.domain = domain
+            this.populateDomainData()
           } else {
-            this.$emit('no-user-found')
+            this.$emit('no-domain-found')
           }
         }
       })
@@ -164,23 +153,22 @@ export default {
       if (!this.saving) {
         this.saving = true
         const parameters = {
-          UserId: this.user?.id,
-          TenantId: this.user.tenantId,
-          UseGlobalSignature: true,
-          Name: this.name,
-          Position: this.position,
-          Phone: this.phone,
-          Email: this.email,
+          DomainId: this.domain?.id,
+          TenantId: this.domain.tenantId,
+          Name: typesUtils.pInt(this.name),
+          Position: typesUtils.pInt(this.position),
+          Phone: typesUtils.pInt(this.phone),
+          Email: typesUtils.pInt(this.email),
         }
         webApi.sendRequest({
           moduleName: 'MailDomainsGlobalSignature',
-          methodName: 'UpdateGlobalSignatureUserData',
+          methodName: 'UpdateDomain',
           parameters
         }).then(result => {
           this.saving = false
           if (result) {
-            cache.getUser(parameters.TenantId, parameters.EntityId).then(({ user }) => {
-              user.updateData([
+            cache.getDomain(parameters.TenantId, parameters.EntityId).then(({ domain }) => {
+              domain.updateData([
                 {
                   field: 'MailDomainsGlobalSignature::Name',
                   value: parameters.name

@@ -32,6 +32,24 @@ export default {
     ]
   },
 
+  getAdminDomainTabs () {
+    return [
+      {
+        tabName: 'mail-global-signature',
+        paths: [
+          'id/:id/mail-global-signature',
+          'search/:search/id/:id/mail-global-signature',
+          'page/:page/id/:id/mail-global-signature',
+          'search/:search/page/:page/id/:id/mail-global-signature',
+        ],
+        title: 'MAILDOMAINSGLOBALSIGNATURE.LABEL_DOMAIN_GLOBAL_SIGNATURE_SETTINGS_TAB',
+        component() {
+          return import('./components/MailGlobalSignatureAdminSettingsPerDomain')
+        }
+      }
+    ]
+  },
+
   getAdminUserTabs () {
     return [
       {

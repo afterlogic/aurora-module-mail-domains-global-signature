@@ -77,7 +77,7 @@ class Module extends \Aurora\System\Module\AbstractModule
             $result = $signature->save();
         }
 
-        return $result;
+        return $signature->Id;
     }
 
     public function DeleteGlobalSignature($SignatureId)
