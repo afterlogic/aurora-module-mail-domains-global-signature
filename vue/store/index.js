@@ -18,7 +18,7 @@ export default {
 
   mutations: {
     setSignatures(state, signatures) {
-      Vue.set(state.signatures, signatures)
+      state.signatures = signatures
     },
   },
 
@@ -51,13 +51,12 @@ export default {
 
   getters: {
     getSignatures (state) {
-      return state.signatures
+      return typesUtils.pArray(state.signatures)
     },
 
     getSignature (state) {
       return function (signatureId) {
-        const tenantSignatures = typesUtils.pArray(state.signatures)
-        return tenantSignatures.find(signature => signature.id === signatureId)
+        return state.signatures.find(signature => signature.id === signatureId)
       }
     },
   },

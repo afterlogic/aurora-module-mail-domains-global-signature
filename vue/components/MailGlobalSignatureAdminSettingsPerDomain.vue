@@ -46,9 +46,6 @@ export default {
   data () {
     return {
       selectedSignature: 0,
-      signatureOptions: [
-        { name: this.$t('MAILDOMAINSGLOBALSIGNATURE.LABEL_SIGNATURE_NOT_SELECTED'), value: 0 }
-      ],
 
       domain: null,
       name: '',
@@ -64,6 +61,18 @@ export default {
     currentTenantId() {
       return this.$store.getters['tenants/getCurrentTenantId']
     },
+
+    globalSignatures() {
+      return this.$store.getters['maildomainsglobalsignature/getSignatures']
+    },
+
+    signatureOptions() {
+      const signatureOptions = this.globalSignatures.map(signature => {
+        return { name: signature.name, value: signature.id }
+      })
+      signatureOptions.unshift({ name: this.$t('MAILDOMAINSGLOBALSIGNATURE.LABEL_SIGNATURE_NOT_SELECTED'), value: 0 })
+      return signatureOptions
+    },
   },
 
   watch: {
@@ -73,7 +82,7 @@ export default {
   },
 
   mounted() {
-    this.$store.dispatch('tenants/completeTenantData', this.tenant.id)
+    this.$store.dispatch('maildomainsglobalsignature/requestSignaturesIfNecessary')
     this.parseRoute()
   },
 
@@ -119,7 +128,8 @@ export default {
 
     parseRoute () {
       const domainId = typesUtils.pPositiveInt(this.$route?.params?.id)
-      const domain = this.$store.getters['maildomains/getDomain'](this.currentTenantId, domainId)
+      this.domain = this.$store.getters['maildomains/getDomain'](this.currentTenantId, domainId)
+      console.log('parseRoute', this.domain)
       // if (domain) {
       //   this.fillUp(domain)
       // } else {
@@ -135,8 +145,8 @@ export default {
 
     populate () {
       this.loading = true
-      const currentTenantId = this.$store.getters['tenants/getCurrentTenantId']
-      cache.getDomain(currentTenantId, this.domain.id).then(({ domain, domainId }) => {
+      cache.getDomain(this.currentTenantId, this.domain.id).then(({ domain, domainId }) => {
+        console.log('populate', domain)
         if (domainId === this.domain.id) {
           this.loading = false
           if (domain && _.isFunction(domain?.getData)) {
@@ -150,44 +160,35 @@ export default {
     },
 
     updateSettingsForEntity () {
-      if (!this.saving) {
+      console.log('updateSettingsForEntity', this.saving, this.domain)
+      if (!this.saving && this.domain) {
         this.saving = true
-        const parameters = {
-          DomainId: this.domain?.id,
-          TenantId: this.domain.tenantId,
-          Name: typesUtils.pInt(this.name),
-          Position: typesUtils.pInt(this.position),
-          Phone: typesUtils.pInt(this.phone),
-          Email: typesUtils.pInt(this.email),
+        const
+          addSignature = this.selectedSignature > 0,
+          methodName = addSignature ? 'AddGlobalSignatureToDomain' : 'RemoveGlobalSignatureFromDomain',
+          tenantId = this.domain.tenantId,
+          parameters = {
+            DomainId: this.domain.id,
+            SignatureId: this.selectedSignature,
+          }
+        if (addSignature) {
+          parameters.SignatureId = this.selectedSignature
         }
+        console.log({ methodName, parameters })
         webApi.sendRequest({
           moduleName: 'MailDomainsGlobalSignature',
-          methodName: 'UpdateDomain',
+          methodName,
           parameters
         }).then(result => {
           this.saving = false
-          if (result) {
-            cache.getDomain(parameters.TenantId, parameters.EntityId).then(({ domain }) => {
-              domain.updateData([
-                {
-                  field: 'MailDomainsGlobalSignature::Name',
-                  value: parameters.name
-                },
-                {
-                  field: 'MailDomainsGlobalSignature::Position',
-                  value: parameters.position
-                },
-                {
-                  field: 'MailDomainsGlobalSignature::Phone',
-                  value: parameters.phone
-                },
-                {
-                  field: 'MailDomainsGlobalSignature::Email',
-                  value: parameters.email
-                },
-              ])
-              this.populate()
-            })
+          if (result && this.domain && this.domain.id === parameters.DomainId) {
+            // this.domain.updateData([
+            //   {
+            //     field: 'MailDomainsGlobalSignature::SignatureId',
+            //     value: parameters.name
+            //   },
+            // ])
+            this.populate()
             notification.showReport(this.$t('COREWEBCLIENT.REPORT_SETTINGS_UPDATE_SUCCESS'))
           } else {
             notification.showError(this.$t('COREWEBCLIENT.ERROR_SAVING_SETTINGS_FAILED'))
