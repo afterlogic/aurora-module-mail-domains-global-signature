@@ -28,6 +28,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 	{
         $this->aRequireModules = ['MailDomains'];
 		$this->aErrors = [];
+        $this->subscribeEvent('MailDomains::Domain::ToResponseArray', array($this, 'onDomainToResponseArray'));
     }
 
     /**
@@ -181,5 +182,13 @@ class Module extends \Aurora\System\Module\AbstractModule
 
         return $result;
 
+    }
+
+    public function onDomainToResponseArray($aArgs, &$mResult)
+	{
+		if (is_array($aArgs) && isset($aArgs['Domain']) && $aArgs['Domain'] instanceof Domain)
+		{
+            $mResult[self::GetName() . '::SignatureId'] = $aArgs['Domain']->getExtendedProp(self::GetName() . '::SignatureId');
+        }
     }
 }
