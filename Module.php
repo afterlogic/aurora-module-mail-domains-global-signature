@@ -10,6 +10,7 @@ namespace Aurora\Modules\MailDomainsGlobalSignature;
 
 use Aurora\Api;
 use Aurora\Modules\Core\Models\User;
+use Aurora\Modules\Mail\Models\MailAccount;
 use Aurora\Modules\MailDomains\Models\Domain;
 use Aurora\Modules\MailDomainsGlobalSignature\Models\GlobalSignature;
 use Aurora\System\Enums\UserRole;
@@ -28,7 +29,8 @@ class Module extends \Aurora\System\Module\AbstractModule
 	{
         $this->aRequireModules = ['MailDomains'];
 		$this->aErrors = [];
-        $this->subscribeEvent('MailDomains::Domain::ToResponseArray', array($this, 'onDomainToResponseArray'));
+        $this->subscribeEvent('MailDomains::Domain::ToResponseArray', [$this, 'onDomainToResponseArray']);
+		$this->subscribeEvent('Mail::Account::ToResponseArray', [$this, 'onMailAccountToResponseArray']);
     }
 
     /**
@@ -186,9 +188,45 @@ class Module extends \Aurora\System\Module\AbstractModule
 
     public function onDomainToResponseArray($aArgs, &$mResult)
 	{
-		if (is_array($aArgs) && isset($aArgs['Domain']) && $aArgs['Domain'] instanceof Domain)
-		{
+		if (is_array($aArgs) && isset($aArgs['Domain']) && $aArgs['Domain'] instanceof Domain) {
             $mResult[self::GetName() . '::SignatureId'] = $aArgs['Domain']->getExtendedProp(self::GetName() . '::SignatureId');
+        }
+    }
+
+    public function onMailAccountToResponseArray($aArgs, &$mResult)
+    {
+        if (is_array($aArgs) && isset($aArgs['Account']) && $aArgs['Account'] instanceof MailAccount) {
+            $mailAccount = $aArgs['Account'];
+            $user = Api::getUserById($mailAccount->IdUser);
+            if ($user instanceof User) {
+                if ($user->PublicId === $mailAccount->Email && $user->getExtendedProp(self::GetName() . '::UseGlobalSignature', false)) {
+                    $domainId = $user->getExtendedProp('MailDomains::DomainId', false);
+                    if ($domainId) {
+                        $domain = Domain::find($domainId);
+                        if ($domain) {
+                            $signatureId = $domain->getExtendedProp(self::GetName() . '::SignatureId');
+                            if (is_int($signatureId)) {
+                                $signature = GlobalSignature::find($signatureId);
+                                if ($signature) {
+
+                                    $mResult['UseSignature'] = true;
+                                    $mResult['AllowEditSignature'] = false;
+                                    $mResult['Signature'] = str_replace(
+                                        ['{{Name}}', '{{Position}}', '{{Phone}}', '{{Email}}'],
+                                        [
+                                            $user->getExtendedProp(self::GetName() . '::Name', ''),
+                                            $user->getExtendedProp(self::GetName() . '::Position', ''),
+                                            $user->getExtendedProp(self::GetName() . '::Phone', ''),
+                                            $user->getExtendedProp(self::GetName() . '::Email', ''),
+                                        ],
+                                        $signature->Signature
+                                    );
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }
