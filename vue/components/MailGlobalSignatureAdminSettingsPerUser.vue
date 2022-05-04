@@ -7,6 +7,13 @@
       <q-card flat bordered class="card-edit-settings">
         <q-card-section>
           <div class="row q-mb-md">
+            <div class="col-6">
+              <q-checkbox dense v-model="useGlobalSignature">
+                <q-item-label v-t="'MAILDOMAINSGLOBALSIGNATURE.LABEL_USE_GLOBAL_SIGNATURE'"/>
+              </q-checkbox>
+            </div>
+          </div>
+          <div class="row q-mb-md">
             <div class="col-2">
               <div class="q-my-sm">
                 {{ $t('MAILDOMAINSGLOBALSIGNATURE.LABEL_NAME') }}
@@ -75,6 +82,7 @@ export default {
   data () {
     return {
       user: null,
+      useGlobalSignature: false,
       name: '',
       position: '',
       phone: '',
@@ -104,11 +112,13 @@ export default {
      */
     hasChanges () {
       const
+        useGlobalSignature = _.isFunction(this.user?.getData) ? !!this.user?.getData('MailDomainsGlobalSignature::UseGlobalSignature') : '',
         name = _.isFunction(this.user?.getData) ? this.user?.getData('MailDomainsGlobalSignature::Name') : '',
         position = _.isFunction(this.user?.getData) ? this.user?.getData('MailDomainsGlobalSignature::Position') : '',
         phone = _.isFunction(this.user?.getData) ? this.user?.getData('MailDomainsGlobalSignature::Phone') : '',
         email = _.isFunction(this.user?.getData) ? this.user?.getData('MailDomainsGlobalSignature::Email') : ''
-      return this.name !== name || this.position !== position || this.phone !== phone || this.email !== email
+      return this.useGlobalSignature !== useGlobalSignature || this.name !== name || this.position !== position ||
+             this.phone !== phone || this.email !== email
     },
 
     /**
@@ -122,11 +132,13 @@ export default {
 
     populateUserData () {
       if (_.isFunction(this.user?.getData)) {
+        this.useGlobalSignature = !!this.user?.getData('MailDomainsGlobalSignature::UseGlobalSignature')
         this.name = this.user?.getData('MailDomainsGlobalSignature::Name')
         this.position = this.user?.getData('MailDomainsGlobalSignature::Position')
         this.phone = this.user?.getData('MailDomainsGlobalSignature::Phone')
         this.email = this.user?.getData('MailDomainsGlobalSignature::Email')
       } else {
+        this.useGlobalSignature = false
         this.name = ''
         this.position = ''
         this.phone = ''
@@ -166,7 +178,7 @@ export default {
         const parameters = {
           UserId: this.user?.id,
           TenantId: this.user.tenantId,
-          UseGlobalSignature: true,
+          UseGlobalSignature: this.useGlobalSignature,
           Name: this.name,
           Position: this.position,
           Phone: this.phone,
@@ -179,23 +191,27 @@ export default {
         }).then(result => {
           this.saving = false
           if (result) {
-            cache.getUser(parameters.TenantId, parameters.EntityId).then(({ user }) => {
+            cache.getUser(parameters.TenantId, parameters.UserId).then(({ user }) => {
               user.updateData([
                 {
+                  field: 'MailDomainsGlobalSignature::UseGlobalSignature',
+                  value: parameters.UseGlobalSignature
+                },
+                {
                   field: 'MailDomainsGlobalSignature::Name',
-                  value: parameters.name
+                  value: parameters.Name
                 },
                 {
                   field: 'MailDomainsGlobalSignature::Position',
-                  value: parameters.position
+                  value: parameters.Position
                 },
                 {
                   field: 'MailDomainsGlobalSignature::Phone',
-                  value: parameters.phone
+                  value: parameters.Phone
                 },
                 {
                   field: 'MailDomainsGlobalSignature::Email',
-                  value: parameters.email
+                  value: parameters.Email
                 },
               ])
               this.populate()

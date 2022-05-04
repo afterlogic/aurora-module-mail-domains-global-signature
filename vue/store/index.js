@@ -1,5 +1,3 @@
-import Vue from 'vue'
-
 import _ from 'lodash'
 
 import errors from 'src/utils/errors'

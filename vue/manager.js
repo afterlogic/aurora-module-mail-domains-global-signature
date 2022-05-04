@@ -1,13 +1,7 @@
-import settings from './settings'
-
 export default {
   moduleName: 'MailDomainsGlobalSignature',
 
   requiredModules: ['Mail', 'MailDomains'],
-
-  init (appData) {
-    settings.init(appData)
-  },
 
   getAdminSystemTabs () {
     return [

@@ -13,7 +13,7 @@
               </div>
             </div>
             <div class="col-4">
-              <q-select outlined dense bg-color="white" v-model="selectedSignature"
+              <q-select outlined dense bg-color="white" v-model="selectedSignatureId"
                         emit-value map-options :options="signatureOptions" option-label="name" />
             </div>
           </div>
@@ -21,7 +21,7 @@
       </q-card>
       <div class="q-pt-md text-right">
         <q-btn unelevated no-caps dense class="q-px-sm" :ripple="false" color="primary"
-               :label="$t('COREWEBCLIENT.ACTION_SAVE')" @click="updateSettingsForEntity"/>
+               :label="$t('COREWEBCLIENT.ACTION_SAVE')" @click="saveSignature"/>
       </div>
     </div>
     <q-inner-loading style="justify-content: flex-start;" :showing="loading || saving">
@@ -45,13 +45,9 @@ export default {
 
   data () {
     return {
-      selectedSignature: 0,
-
       domain: null,
-      name: '',
-      position: '',
-      phone: '',
-      email: '',
+      selectedSignatureId: 0,
+
       loading: false,
       saving: false,
     }
@@ -95,12 +91,8 @@ export default {
      * Method is used in doBeforeRouteLeave mixin
      */
     hasChanges () {
-      const
-        name = _.isFunction(this.domain?.getData) ? this.domain?.getData('MailDomainsGlobalSignature::Name') : '',
-        position = _.isFunction(this.domain?.getData) ? this.domain?.getData('MailDomainsGlobalSignature::Position') : '',
-        phone = _.isFunction(this.domain?.getData) ? this.domain?.getData('MailDomainsGlobalSignature::Phone') : '',
-        email = _.isFunction(this.domain?.getData) ? this.domain?.getData('MailDomainsGlobalSignature::Email') : ''
-      return this.name !== name || this.position !== position || this.phone !== phone || this.email !== email
+      const selectedSignatureId = typesUtils.pInt(this.domain?.data['MailDomainsGlobalSignature::SignatureId'])
+      return this.selectedSignatureId !== selectedSignatureId
     },
 
     /**
@@ -113,68 +105,28 @@ export default {
     },
 
     populateDomainData () {
-      if (_.isFunction(this.domain?.getData)) {
-        this.name = this.domain?.getData('MailDomainsGlobalSignature::Name')
-        this.position = this.domain?.getData('MailDomainsGlobalSignature::Position')
-        this.phone = this.domain?.getData('MailDomainsGlobalSignature::Phone')
-        this.email = this.domain?.getData('MailDomainsGlobalSignature::Email')
-      } else {
-        this.name = ''
-        this.position = ''
-        this.phone = ''
-        this.email = ''
-      }
+      this.selectedSignatureId = typesUtils.pInt(this.domain?.data['MailDomainsGlobalSignature::SignatureId'])
     },
 
     parseRoute () {
       const domainId = typesUtils.pPositiveInt(this.$route?.params?.id)
       this.domain = this.$store.getters['maildomains/getDomain'](this.currentTenantId, domainId)
-      console.log('parseRoute', this.domain)
-      // if (domain) {
-      //   this.fillUp(domain)
-      // } else {
-      //   this.$emit('no-domain-found')
-      // }
-      // if (this.domain?.id !== domainId) {
-      //   this.domain = {
-      //     id: domainId,
-      //   }
-      //   this.populate()
-      // }
+      this.populateDomainData()
     },
 
-    populate () {
-      this.loading = true
-      cache.getDomain(this.currentTenantId, this.domain.id).then(({ domain, domainId }) => {
-        console.log('populate', domain)
-        if (domainId === this.domain.id) {
-          this.loading = false
-          if (domain && _.isFunction(domain?.getData)) {
-            this.domain = domain
-            this.populateDomainData()
-          } else {
-            this.$emit('no-domain-found')
-          }
-        }
-      })
-    },
-
-    updateSettingsForEntity () {
-      console.log('updateSettingsForEntity', this.saving, this.domain)
+    saveSignature () {
       if (!this.saving && this.domain) {
         this.saving = true
         const
-          addSignature = this.selectedSignature > 0,
+          addSignature = this.selectedSignatureId > 0,
           methodName = addSignature ? 'AddGlobalSignatureToDomain' : 'RemoveGlobalSignatureFromDomain',
-          tenantId = this.domain.tenantId,
           parameters = {
             DomainId: this.domain.id,
-            SignatureId: this.selectedSignature,
+            SignatureId: this.selectedSignatureId,
           }
         if (addSignature) {
-          parameters.SignatureId = this.selectedSignature
+          parameters.SignatureId = this.selectedSignatureId
         }
-        console.log({ methodName, parameters })
         webApi.sendRequest({
           moduleName: 'MailDomainsGlobalSignature',
           methodName,
@@ -182,13 +134,13 @@ export default {
         }).then(result => {
           this.saving = false
           if (result && this.domain && this.domain.id === parameters.DomainId) {
-            // this.domain.updateData([
-            //   {
-            //     field: 'MailDomainsGlobalSignature::SignatureId',
-            //     value: parameters.name
-            //   },
-            // ])
-            this.populate()
+            this.$store.dispatch('maildomains/setDomainData', {
+              tenantId: this.domain.tenantId,
+              domainId: this.domain.id,
+              domainData: {
+                'MailDomainsGlobalSignature::SignatureId': parameters.SignatureId
+              }
+            })
             notification.showReport(this.$t('COREWEBCLIENT.REPORT_SETTINGS_UPDATE_SUCCESS'))
           } else {
             notification.showError(this.$t('COREWEBCLIENT.ERROR_SAVING_SETTINGS_FAILED'))
