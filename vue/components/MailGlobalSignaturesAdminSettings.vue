@@ -209,15 +209,16 @@ export default {
         italic: { tip: this.$t('MAILWEBCLIENT.ACTION_SET_ITALIC') },
         underline: { tip: this.$t('MAILWEBCLIENT.ACTION_SET_UNDERLINE') },
         strike: { tip: this.$t('MAILWEBCLIENT.ACTION_SET_STRIKETHROUGH') },
-        'size-2': { tip: this.$t('MAILWEBCLIENT.ACTION_CHOOSE_SMALL_TEXTSIZE') },
-        'size-3': { tip: this.$t('MAILWEBCLIENT.ACTION_CHOOSE_NORMAL_TEXTSIZE') },
-        'size-5': { tip: this.$t('MAILWEBCLIENT.ACTION_CHOOSE_LARGE_TEXTSIZE') },
-        'size-7': { tip: this.$t('MAILWEBCLIENT.ACTION_CHOOSE_HUGE_TEXTSIZE') },
+        // 'size-2': { tip: this.$t('MAILWEBCLIENT.ACTION_CHOOSE_SMALL_TEXTSIZE') },
+        // 'size-3': { tip: this.$t('MAILWEBCLIENT.ACTION_CHOOSE_NORMAL_TEXTSIZE') },
+        // 'size-5': { tip: this.$t('MAILWEBCLIENT.ACTION_CHOOSE_LARGE_TEXTSIZE') },
+        // 'size-7': { tip: this.$t('MAILWEBCLIENT.ACTION_CHOOSE_HUGE_TEXTSIZE') },
         colors: { tip: this.$t('MAILWEBCLIENT.ACTION_SET_COLOR') },
         unordered: { tip: this.$t('MAILWEBCLIENT.ACTION_SET_BULLETS') },
         ordered: { tip: this.$t('MAILWEBCLIENT.ACTION_SET_NUMBERING') },
         link: { tip: this.$t('MAILWEBCLIENT.ACTION_INSERT_LINK') },
         removeFormat: { tip: this.$t('MAILWEBCLIENT.ACTION_REMOVE_FORMAT') },
+        viewsource: { tip: this.$t('MAILDOMAINSGLOBALSIGNATURE.ACTION_VIEW_SOURCE') },
       }
     },
 
@@ -226,6 +227,7 @@ export default {
         ['undo', 'redo'],
         ['bold', 'italic', 'underline', 'strike'],
         [{
+          label: this.$t('MAILDOMAINSGLOBALSIGNATURE.LABEL_DEFAULT_FONT'),
           list: 'no-icons',
           options: [
             'default_font',
@@ -237,6 +239,7 @@ export default {
             'verdana'
           ],
         }, {
+          label: this.$t('MAILDOMAINSGLOBALSIGNATURE.LABEL_FONT_SIZE'),
           list: 'no-icons',
           options: [
             'size-2',
@@ -246,7 +249,7 @@ export default {
           ],
         }, 'colors'],
         ['unordered', 'ordered'],
-        ['link', 'image', 'removeFormat']
+        ['link', 'image', 'removeFormat', 'viewsource']
       ]
     },
   },
