@@ -111,28 +111,15 @@
                             :accept="acceptedImageTypes"
                             @added="onImageFileAdded"
                 >
-                  <!-- <template v-slot:header="scope">
-                    <q-uploader-add-trigger />
-                  </template>
-                  <template v-slot:list="scope" >
-                  </template> -->
                 </q-uploader>
               </div>
             </div>
             <div class="row">
               <div class="col-10">
-                <q-item-label caption v-t="'MAILDOMAINSGLOBALSIGNATURE.HINT_SIGNATURE_PLACEHOLDERS'"/>
-              </div>
-            </div>
-            <div class="row">
-              <div class="col-10">
-                <ul>
-                  <li v-for="placeholder in placeholders" :key="placeholder">
-                    <q-item-label caption>
-                    {{placeholder}}
-                    </q-item-label>
-                  </li>
-                </ul>
+                <q-item-label caption>
+                  <span v-t="'MAILDOMAINSGLOBALSIGNATURE.HINT_SIGNATURE_PLACEHOLDERS'"></span>
+                  <span>{{': ' + placeholders.join(', ')}}</span>
+                </q-item-label>
               </div>
             </div>
           </q-card-section>
@@ -500,7 +487,5 @@ export default {
 </script>
 
 <style scoped>
-  li {
-    color: rgba(0, 0, 0, 0.54);
-  }
+
 </style>
