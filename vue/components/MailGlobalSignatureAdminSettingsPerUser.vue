@@ -5,7 +5,7 @@
         <div class="col text-h5">{{$t('MAILDOMAINSGLOBALSIGNATURE.HEADING_USER_GLOBAL_SIGNATURE_SETTINGS') }}</div>
       </div>
       <q-card flat bordered class="card-edit-settings">
-        <q-card-section>
+        <q-card-section v-if="hasGlobalSignature">
           <div class="row q-mb-md">
             <div class="col-6">
               <q-checkbox dense v-model="useGlobalSignature">
@@ -43,7 +43,7 @@
               <q-input outlined dense class="col-4" bg-color="white" v-model="phone"/>
             </div>
           </div>
-          <div class="row q-mb-md">
+          <div class="row">
             <div class="col-2">
               <div class="q-my-sm">
                 {{ $t('MAILDOMAINSGLOBALSIGNATURE.LABEL_EMAIL') }}
@@ -51,6 +51,13 @@
             </div>
             <div class="col-4">
               <q-input outlined dense class="col-4" bg-color="white" v-model="email"/>
+            </div>
+          </div>
+        </q-card-section>
+        <q-card-section v-else>
+          <div class="row">
+            <div class="col-10">
+              <q-item-label caption v-t="'MAILDOMAINSGLOBALSIGNATURE.HINT_SIGNATURE_NOT_SET'"/>
             </div>
           </div>
         </q-card-section>
@@ -82,6 +89,7 @@ export default {
   data () {
     return {
       user: null,
+      hasGlobalSignature: false,
       useGlobalSignature: false,
       name: '',
       position: '',
@@ -92,13 +100,30 @@ export default {
     }
   },
 
+  computed: {
+    currentTenantId () {
+      return this.$store.getters['tenants/getCurrentTenantId']
+    },
+
+    allDomainLists () {
+      return this.$store.getters['maildomains/getDomains']
+    },
+
+    domains () {
+      return typesUtils.pArray(this.allDomainLists[this.currentTenantId])
+    }
+  },
+
   watch: {
     $route(to, from) {
       this.parseRoute()
     },
   },
 
-  mounted() {
+  mounted () {
+    this.$store.dispatch('maildomains/requestDomainsIfNecessary', {
+      tenantId: this.currentTenantId
+    })
     this.parseRoute()
   },
 
@@ -132,12 +157,18 @@ export default {
 
     populateUserData () {
       if (_.isFunction(this.user?.getData)) {
+        const
+          domainId = this.user?.getData('MailDomains::DomainId'),
+          domain = this.domains.find(domain => domain.id === domainId),
+          signatureId = typesUtils.pInt(domain && domain.data && domain.data['MailDomainsGlobalSignature::SignatureId'])
+        this.hasGlobalSignature = signatureId > 0
         this.useGlobalSignature = !!this.user?.getData('MailDomainsGlobalSignature::UseGlobalSignature')
         this.name = this.user?.getData('MailDomainsGlobalSignature::Name')
         this.position = this.user?.getData('MailDomainsGlobalSignature::Position')
         this.phone = this.user?.getData('MailDomainsGlobalSignature::Phone')
         this.email = this.user?.getData('MailDomainsGlobalSignature::Email')
       } else {
+        this.hasGlobalSignature = false
         this.useGlobalSignature = false
         this.name = ''
         this.position = ''
