@@ -6,7 +6,7 @@
       </div>
       <q-card flat bordered class="card-edit-settings">
         <q-card-section>
-          <div class="row q-mb-md">
+          <div class="row">
             <div class="col-2">
               <div class="q-my-sm">
                 {{ $t('MAILDOMAINSGLOBALSIGNATURE.LABEL_SIGNATURE') }}
@@ -37,8 +37,6 @@ import errors from 'src/utils/errors'
 import notification from 'src/utils/notification'
 import typesUtils from 'src/utils/types'
 import webApi from 'src/utils/web-api'
-
-import cache from 'src/cache'
 
 export default {
   name: 'MailGlobalSignatureAdminSettingsPerDomain',
@@ -121,8 +119,7 @@ export default {
           addSignature = this.selectedSignatureId > 0,
           methodName = addSignature ? 'AddGlobalSignatureToDomain' : 'RemoveGlobalSignatureFromDomain',
           parameters = {
-            DomainId: this.domain.id,
-            SignatureId: this.selectedSignatureId,
+            DomainId: this.domain.id
           }
         if (addSignature) {
           parameters.SignatureId = this.selectedSignatureId
