@@ -55,7 +55,7 @@
             <div class="row q-mt-sm q-mb-lg">
               <div class="col-2 q-my-sm q-pl-sm required-field" v-t="'MAILDOMAINSGLOBALSIGNATURE.LABEL_SIGNATURE'"></div>
               <div class="col-9">
-                <q-editor class="full-height" outlined
+                <q-editor class="full-height" outlined style="max-width: 1200px; max-height: 800px;"
                           ref="editor"
                           v-model="signatureHtml"
                           height="calc(100% - 32px)"
