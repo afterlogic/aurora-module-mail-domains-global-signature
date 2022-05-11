@@ -43,7 +43,7 @@
               <q-input outlined dense class="col-4" bg-color="white" v-model="phone"/>
             </div>
           </div>
-          <div class="row">
+          <div class="row q-mb-md">
             <div class="col-2">
               <div class="q-my-sm">
                 {{ $t('MAILDOMAINSGLOBALSIGNATURE.LABEL_EMAIL') }}
@@ -51,6 +51,16 @@
             </div>
             <div class="col-4">
               <q-input outlined dense class="col-4" bg-color="white" v-model="email"/>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-2">
+              <div class="q-my-sm">
+                {{ $t('MAILDOMAINSGLOBALSIGNATURE.LABEL_OPTIONAL') }}
+              </div>
+            </div>
+            <div class="col-4">
+              <q-input outlined dense class="col-4" bg-color="white" v-model="optional"/>
             </div>
           </div>
         </q-card-section>
@@ -95,6 +105,7 @@ export default {
       position: '',
       phone: '',
       email: '',
+      optional: '',
       loading: false,
       saving: false,
     }
@@ -141,9 +152,10 @@ export default {
         name = _.isFunction(this.user?.getData) ? this.user?.getData('MailDomainsGlobalSignature::Name') : '',
         position = _.isFunction(this.user?.getData) ? this.user?.getData('MailDomainsGlobalSignature::Position') : '',
         phone = _.isFunction(this.user?.getData) ? this.user?.getData('MailDomainsGlobalSignature::Phone') : '',
-        email = _.isFunction(this.user?.getData) ? this.user?.getData('MailDomainsGlobalSignature::Email') : ''
+        email = _.isFunction(this.user?.getData) ? this.user?.getData('MailDomainsGlobalSignature::Email') : '',
+        optional = _.isFunction(this.user?.getData) ? this.user?.getData('MailDomainsGlobalSignature::Optional') : ''
       return this.useGlobalSignature !== useGlobalSignature || this.name !== name || this.position !== position ||
-             this.phone !== phone || this.email !== email
+             this.phone !== phone || this.email !== email || this.optional !== optional
     },
 
     /**
@@ -167,6 +179,7 @@ export default {
         this.position = this.user?.getData('MailDomainsGlobalSignature::Position')
         this.phone = this.user?.getData('MailDomainsGlobalSignature::Phone')
         this.email = this.user?.getData('MailDomainsGlobalSignature::Email')
+        this.optional = this.user?.getData('MailDomainsGlobalSignature::Optional')
       } else {
         this.hasGlobalSignature = false
         this.useGlobalSignature = false
@@ -174,6 +187,7 @@ export default {
         this.position = ''
         this.phone = ''
         this.email = ''
+        this.optional = ''
       }
     },
 
@@ -214,6 +228,7 @@ export default {
           Position: this.position,
           Phone: this.phone,
           Email: this.email,
+          Optional: this.optional,
         }
         webApi.sendRequest({
           moduleName: 'MailDomainsGlobalSignature',
@@ -243,6 +258,10 @@ export default {
                 {
                   field: 'MailDomainsGlobalSignature::Email',
                   value: parameters.Email
+                },
+                {
+                  field: 'MailDomainsGlobalSignature::Optional',
+                  value: parameters.Optional
                 },
               ])
               this.populate()

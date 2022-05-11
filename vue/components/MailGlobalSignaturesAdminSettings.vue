@@ -182,7 +182,7 @@ export default {
 
       signatureName: '',
       signatureHtml: '',
-      placeholders: ['{{Name}}', '{{Position}}', '{{Phone}}', '{{Email}}'],
+      placeholders: ['{{Name}}', '{{Position}}', '{{Phone}}', '{{Email}}', '{{Optional}}'],
 
       acceptedImageTypes: 'image/*',
       imageUrl: '',
