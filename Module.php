@@ -162,7 +162,7 @@ class Module extends \Aurora\System\Module\AbstractModule
         return $result;
     }
 
-    public function UpdateGlobalSignatureUserData($UserId, $UseGlobalSignature, $Name, $Position, $Phone, $Email, $Optional)
+    public function UpdateGlobalSignatureUserData($UserId, $UseGlobalSignature, $AllowCreatingIdentities, $Name, $Position, $Phone, $Email, $Optional)
     {
         $result = false;
 
@@ -174,6 +174,7 @@ class Module extends \Aurora\System\Module\AbstractModule
         if ($user) {
 
             $user->setExtendedProp(self::GetName() . '::UseGlobalSignature', $UseGlobalSignature);
+            $user->setExtendedProp(self::GetName() . '::AllowCreatingIdentities', $AllowCreatingIdentities);
             $user->setExtendedProp(self::GetName() . '::Name', $Name);
             $user->setExtendedProp(self::GetName() . '::Position', $Position);
             $user->setExtendedProp(self::GetName() . '::Phone', $Phone);
@@ -212,6 +213,7 @@ class Module extends \Aurora\System\Module\AbstractModule
 
                                     $mResult['UseSignature'] = true;
                                     $mResult['AllowEditSignature'] = false;
+                                    $mResult['AllowUseIdentities'] = $user->getExtendedProp(self::GetName() . '::AllowCreatingIdentities', false);
                                     $mResult['Signature'] = str_replace(
                                         ['{{Name}}', '{{Position}}', '{{Phone}}', '{{Email}}', '{{Optional}}'],
                                         [

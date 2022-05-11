@@ -14,6 +14,13 @@
             </div>
           </div>
           <div class="row q-mb-md">
+            <div class="col-6">
+              <q-checkbox dense v-model="allowCreatingIdentities">
+                <q-item-label v-t="'MAILDOMAINSGLOBALSIGNATURE.LABEL_ALLOW_CREATING_IDENTITIES'"/>
+              </q-checkbox>
+            </div>
+          </div>
+          <div class="row q-mb-md">
             <div class="col-2">
               <div class="q-my-sm">
                 {{ $t('MAILDOMAINSGLOBALSIGNATURE.LABEL_NAME') }}
@@ -101,6 +108,7 @@ export default {
       user: null,
       hasGlobalSignature: false,
       useGlobalSignature: false,
+      allowCreatingIdentities: false,
       name: '',
       position: '',
       phone: '',
@@ -149,13 +157,15 @@ export default {
     hasChanges () {
       const
         useGlobalSignature = _.isFunction(this.user?.getData) ? !!this.user?.getData('MailDomainsGlobalSignature::UseGlobalSignature') : '',
+        allowCreatingIdentities = _.isFunction(this.user?.getData) ? !!this.user?.getData('MailDomainsGlobalSignature::AllowCreatingIdentities') : '',
         name = _.isFunction(this.user?.getData) ? this.user?.getData('MailDomainsGlobalSignature::Name') : '',
         position = _.isFunction(this.user?.getData) ? this.user?.getData('MailDomainsGlobalSignature::Position') : '',
         phone = _.isFunction(this.user?.getData) ? this.user?.getData('MailDomainsGlobalSignature::Phone') : '',
         email = _.isFunction(this.user?.getData) ? this.user?.getData('MailDomainsGlobalSignature::Email') : '',
         optional = _.isFunction(this.user?.getData) ? this.user?.getData('MailDomainsGlobalSignature::Optional') : ''
-      return this.useGlobalSignature !== useGlobalSignature || this.name !== name || this.position !== position ||
-             this.phone !== phone || this.email !== email || this.optional !== optional
+      return this.useGlobalSignature !== useGlobalSignature || this.allowCreatingIdentities !== allowCreatingIdentities ||
+             this.name !== name || this.position !== position || this.phone !== phone || this.email !== email ||
+             this.optional !== optional
     },
 
     /**
@@ -175,6 +185,7 @@ export default {
           signatureId = typesUtils.pInt(domain && domain.data && domain.data['MailDomainsGlobalSignature::SignatureId'])
         this.hasGlobalSignature = signatureId > 0
         this.useGlobalSignature = !!this.user?.getData('MailDomainsGlobalSignature::UseGlobalSignature')
+        this.allowCreatingIdentities = !!this.user?.getData('MailDomainsGlobalSignature::AllowCreatingIdentities')
         this.name = this.user?.getData('MailDomainsGlobalSignature::Name')
         this.position = this.user?.getData('MailDomainsGlobalSignature::Position')
         this.phone = this.user?.getData('MailDomainsGlobalSignature::Phone')
@@ -183,6 +194,7 @@ export default {
       } else {
         this.hasGlobalSignature = false
         this.useGlobalSignature = false
+        this.allowCreatingIdentities = false
         this.name = ''
         this.position = ''
         this.phone = ''
@@ -224,6 +236,7 @@ export default {
           UserId: this.user?.id,
           TenantId: this.user.tenantId,
           UseGlobalSignature: this.useGlobalSignature,
+          AllowCreatingIdentities: this.allowCreatingIdentities,
           Name: this.name,
           Position: this.position,
           Phone: this.phone,
@@ -242,6 +255,10 @@ export default {
                 {
                   field: 'MailDomainsGlobalSignature::UseGlobalSignature',
                   value: parameters.UseGlobalSignature
+                },
+                {
+                  field: 'MailDomainsGlobalSignature::AllowCreatingIdentities',
+                  value: parameters.AllowCreatingIdentities
                 },
                 {
                   field: 'MailDomainsGlobalSignature::Name',
