@@ -16,8 +16,10 @@ class CreateMailDomainsGlobalSignatureTable extends Migration
         Capsule::schema()->create('mail_domains_global_signature', function (Blueprint $table) {
             $table->increments('Id');
             $table->string('Name');
-            $table->text('Signature');
         });
+
+        $prefix = Capsule::connection()->getTablePrefix();
+        Capsule::statement("ALTER TABLE {$prefix}mail_domains_global_signature ADD Signature MEDIUMBLOB NOT NULL");
     }
 
     /**
