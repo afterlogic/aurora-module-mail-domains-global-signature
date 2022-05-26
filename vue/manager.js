@@ -1,3 +1,7 @@
+import MailGlobalSignaturesAdminSettings from './components/MailGlobalSignaturesAdminSettings'
+import MailGlobalSignatureAdminSettingsPerDomain from './components/MailGlobalSignatureAdminSettingsPerDomain'
+import MailGlobalSignatureAdminSettingsPerUser from './components/MailGlobalSignatureAdminSettingsPerUser'
+
 export default {
   moduleName: 'MailDomainsGlobalSignature',
 
@@ -7,21 +11,18 @@ export default {
     return [
       {
         tabName: 'mail-global-signatures',
-        paths: [
-          'mail-global-signatures',
-          'mail-global-signatures/id/:id',
-          'mail-global-signatures/create',
-          'mail-global-signatures/search/:search',
-          'mail-global-signatures/search/:search/id/:id',
-          'mail-global-signatures/page/:page',
-          'mail-global-signatures/page/:page/id/:id',
-          'mail-global-signatures/search/:search/page/:page',
-          'mail-global-signatures/search/:search/page/:page/id/:id',
+        tabTitle: 'MAILDOMAINSGLOBALSIGNATURE.LABEL_ALL_GLOBAL_SIGNATURES_SETTINGS_TAB',
+        tabRouteChildren: [
+          { path: 'mail-global-signatures', component: MailGlobalSignaturesAdminSettings },
+          { path: 'mail-global-signatures/id/:id', component: MailGlobalSignaturesAdminSettings },
+          { path: 'mail-global-signatures/create', component: MailGlobalSignaturesAdminSettings },
+          { path: 'mail-global-signatures/search/:search', component: MailGlobalSignaturesAdminSettings },
+          { path: 'mail-global-signatures/search/:search/id/:id', component: MailGlobalSignaturesAdminSettings },
+          { path: 'mail-global-signatures/page/:page', component: MailGlobalSignaturesAdminSettings },
+          { path: 'mail-global-signatures/page/:page/id/:id', component: MailGlobalSignaturesAdminSettings },
+          { path: 'mail-global-signatures/search/:search/page/:page', component: MailGlobalSignaturesAdminSettings },
+          { path: 'mail-global-signatures/search/:search/page/:page/id/:id', component: MailGlobalSignaturesAdminSettings },
         ],
-        title: 'MAILDOMAINSGLOBALSIGNATURE.LABEL_ALL_GLOBAL_SIGNATURES_SETTINGS_TAB',
-        component() {
-          return import('./components/MailGlobalSignaturesAdminSettings')
-        },
       },
     ]
   },
@@ -30,16 +31,13 @@ export default {
     return [
       {
         tabName: 'mail-global-signature',
-        paths: [
-          'id/:id/mail-global-signature',
-          'search/:search/id/:id/mail-global-signature',
-          'page/:page/id/:id/mail-global-signature',
-          'search/:search/page/:page/id/:id/mail-global-signature',
+        tabTitle: 'MAILDOMAINSGLOBALSIGNATURE.LABEL_DOMAIN_GLOBAL_SIGNATURE_SETTINGS_TAB',
+        tabRouteChildren: [
+          { path: 'id/:id/mail-global-signature', component: MailGlobalSignatureAdminSettingsPerDomain },
+          { path: 'search/:search/id/:id/mail-global-signature', component: MailGlobalSignatureAdminSettingsPerDomain },
+          { path: 'page/:page/id/:id/mail-global-signature', component: MailGlobalSignatureAdminSettingsPerDomain },
+          { path: 'search/:search/page/:page/id/:id/mail-global-signature', component: MailGlobalSignatureAdminSettingsPerDomain },
         ],
-        title: 'MAILDOMAINSGLOBALSIGNATURE.LABEL_DOMAIN_GLOBAL_SIGNATURE_SETTINGS_TAB',
-        component() {
-          return import('./components/MailGlobalSignatureAdminSettingsPerDomain')
-        }
       }
     ]
   },
@@ -48,17 +46,14 @@ export default {
     return [
       {
         tabName: 'mail-global-signature',
-        paths: [
-          'id/:id/mail-global-signature',
-          'search/:search/id/:id/mail-global-signature',
-          'page/:page/id/:id/mail-global-signature',
-          'search/:search/page/:page/id/:id/mail-global-signature',
+        tabTitle: 'MAILDOMAINSGLOBALSIGNATURE.LABEL_USER_GLOBAL_SIGNATURE_SETTINGS_TAB',
+        tabRouteChildren: [
+          { path: 'id/:id/mail-global-signature', component: MailGlobalSignatureAdminSettingsPerUser },
+          { path: 'search/:search/id/:id/mail-global-signature', component: MailGlobalSignatureAdminSettingsPerUser },
+          { path: 'page/:page/id/:id/mail-global-signature', component: MailGlobalSignatureAdminSettingsPerUser },
+          { path: 'search/:search/page/:page/id/:id/mail-global-signature', component: MailGlobalSignatureAdminSettingsPerUser },
         ],
-        title: 'MAILDOMAINSGLOBALSIGNATURE.LABEL_USER_GLOBAL_SIGNATURE_SETTINGS_TAB',
-        component() {
-          return import('./components/MailGlobalSignatureAdminSettingsPerUser')
-        }
-      }
+      },
     ]
   },
 }

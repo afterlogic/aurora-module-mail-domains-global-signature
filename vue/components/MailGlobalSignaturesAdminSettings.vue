@@ -256,6 +256,44 @@ export default {
 
   watch: {
     $route (to, from) {
+      this.parseRoute()
+    },
+
+    selectedPage () {
+      if (this.selectedPage !== this.page) {
+        this.route()
+      }
+    },
+  },
+
+  beforeRouteLeave (to, from, next) {
+    this.doBeforeRouteLeave(to, from, next)
+  },
+
+  beforeRouteUpdate (to, from, next) {
+    this.doBeforeRouteLeave(to, from, next)
+  },
+
+  mounted () {
+    this.saving = false
+    this.creating = false
+    this.populate()
+    this.parseRoute()
+  },
+
+  methods: {
+    route (signatureId = 0) {
+      const searchRoute = this.enteredSearch !== '' ? ('/search/' + this.enteredSearch) : ''
+      const selectedPage = (this.search !== this.enteredSearch) ? 1 : this.selectedPage
+      const pageRoute = selectedPage > 1 ? ('/page/' + selectedPage) : ''
+      const idRoute = signatureId > 0 ? ('/id/' + signatureId) : ''
+      const path = '/system/mail-global-signatures' + searchRoute + pageRoute + idRoute
+      if (path !== this.$route.path) {
+        this.$router.push(path)
+      }
+    },
+
+    parseRoute () {
       if (this.$route.path === '/system/mail-global-signatures/create') {
         this.createMode = true
         this.showSignatureFields = false
@@ -278,39 +316,6 @@ export default {
           this.currentSignatureId = signatureId
           this.populateSignature()
         }
-      }
-    },
-
-    selectedPage () {
-      if (this.selectedPage !== this.page) {
-        this.route()
-      }
-    },
-  },
-
-  beforeRouteLeave (to, from, next) {
-    this.doBeforeRouteLeave(to, from, next)
-  },
-
-  beforeRouteUpdate (to, from, next) {
-    this.doBeforeRouteLeave(to, from, next)
-  },
-
-  mounted () {
-    this.saving = false
-    this.creating = false
-    this.populate()
-  },
-
-  methods: {
-    route (signatureId = 0) {
-      const searchRoute = this.enteredSearch !== '' ? ('/search/' + this.enteredSearch) : ''
-      const selectedPage = (this.search !== this.enteredSearch) ? 1 : this.selectedPage
-      const pageRoute = selectedPage > 1 ? ('/page/' + selectedPage) : ''
-      const idRoute = signatureId > 0 ? ('/id/' + signatureId) : ''
-      const path = '/system/mail-global-signatures' + searchRoute + pageRoute + idRoute
-      if (path !== this.$route.path) {
-        this.$router.push(path)
       }
     },
 
