@@ -2,6 +2,8 @@ import MailGlobalSignaturesAdminSettings from './components/MailGlobalSignatures
 import MailGlobalSignatureAdminSettingsPerDomain from './components/MailGlobalSignatureAdminSettingsPerDomain'
 import MailGlobalSignatureAdminSettingsPerUser from './components/MailGlobalSignatureAdminSettingsPerUser'
 
+import store from 'src/store'
+
 export default {
   moduleName: 'MailDomainsGlobalSignature',
 
@@ -43,17 +45,21 @@ export default {
   },
 
   getAdminUserTabs () {
-    return [
-      {
-        tabName: 'mail-global-signature',
-        tabTitle: 'MAILDOMAINSGLOBALSIGNATURE.LABEL_USER_GLOBAL_SIGNATURE_SETTINGS_TAB',
-        tabRouteChildren: [
-          { path: 'id/:id/mail-global-signature', component: MailGlobalSignatureAdminSettingsPerUser },
-          { path: 'search/:search/id/:id/mail-global-signature', component: MailGlobalSignatureAdminSettingsPerUser },
-          { path: 'page/:page/id/:id/mail-global-signature', component: MailGlobalSignatureAdminSettingsPerUser },
-          { path: 'search/:search/page/:page/id/:id/mail-global-signature', component: MailGlobalSignatureAdminSettingsPerUser },
-        ],
-      },
-    ]
+    const isUserSuperAdmin = store.getters['user/isUserSuperAdmin']
+    if (isUserSuperAdmin) {
+      return [
+        {
+          tabName: 'mail-global-signature',
+          tabTitle: 'MAILDOMAINSGLOBALSIGNATURE.LABEL_USER_GLOBAL_SIGNATURE_SETTINGS_TAB',
+          tabRouteChildren: [
+            { path: 'id/:id/mail-global-signature', component: MailGlobalSignatureAdminSettingsPerUser },
+            { path: 'search/:search/id/:id/mail-global-signature', component: MailGlobalSignatureAdminSettingsPerUser },
+            { path: 'page/:page/id/:id/mail-global-signature', component: MailGlobalSignatureAdminSettingsPerUser },
+            { path: 'search/:search/page/:page/id/:id/mail-global-signature', component: MailGlobalSignatureAdminSettingsPerUser },
+          ],
+        },
+      ]
+    }
+    return []
   },
 }
