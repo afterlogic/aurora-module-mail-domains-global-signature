@@ -17,7 +17,7 @@ class GlobalSignature extends \Aurora\System\Classes\Model
 {
     protected $table = 'mail_domains_global_signature';
 
-	protected $moduleName = 'MailDomainsGlobalSignature';
+    protected $moduleName = 'MailDomainsGlobalSignature';
 
     public $timestamps = false;
 

@@ -25,12 +25,12 @@ use Aurora\System\Exceptions\ApiException;
  */
 class Module extends \Aurora\System\Module\AbstractModule
 {
-	public function init()
-	{
+    public function init()
+    {
         $this->aRequireModules = ['MailDomains'];
-		$this->aErrors = [];
+        $this->aErrors = [];
         $this->subscribeEvent('MailDomains::Domain::ToResponseArray', [$this, 'onDomainToResponseArray']);
-		$this->subscribeEvent('Mail::Account::ToResponseArray', [$this, 'onMailAccountToResponseArray']);
+        $this->subscribeEvent('Mail::Account::ToResponseArray', [$this, 'onMailAccountToResponseArray']);
     }
 
     /**
@@ -41,14 +41,14 @@ class Module extends \Aurora\System\Module\AbstractModule
     {
         Api::checkUserRoleIsAtLeast(UserRole::SuperAdmin);
 
-        $query = Models\GlobalSignature::query(); 
-        
+        $query = Models\GlobalSignature::query();
+
         if (!empty($Search)) {
             $query = $query->where('Name', 'Like', '%' . $Search . '%');
         }
 
         $count = $query->count();
-        
+
         if ($Offset > 0) {
             $query = $query->offset($Offset);
         }
@@ -116,7 +116,7 @@ class Module extends \Aurora\System\Module\AbstractModule
         return $result;
     }
 
-    public function GetSignature($SignatureId) 
+    public function GetSignature($SignatureId)
     {
         Api::checkUserRoleIsAtLeast(UserRole::SuperAdmin);
 
@@ -124,7 +124,7 @@ class Module extends \Aurora\System\Module\AbstractModule
     }
 
     public function AddGlobalSignatureToDomain($DomainId, $SignatureId)
-    {   
+    {
         $result = false;
 
         Api::checkUserRoleIsAtLeast(UserRole::SuperAdmin);
@@ -132,13 +132,11 @@ class Module extends \Aurora\System\Module\AbstractModule
         $domain = Domain::find($DomainId);
 
         if ($domain) {
-
             $signature = GlobalSignature::find($SignatureId);
             if ($signature) {
                 $domain->setExtendedProp(self::GetName() . '::SignatureId', $SignatureId);
                 $result = $domain->save();
             }
-
         }
 
         return $result;
@@ -153,10 +151,8 @@ class Module extends \Aurora\System\Module\AbstractModule
         $domain = Domain::find($DomainId);
 
         if ($domain) {
-
             $domain->unsetExtendedProp(self::GetName() . '::SignatureId');
             $result = $domain->save();
-
         }
 
         return $result;
@@ -172,7 +168,6 @@ class Module extends \Aurora\System\Module\AbstractModule
         $user = User::find($UserId);
 
         if ($user) {
-
             $user->setExtendedProp(self::GetName() . '::UseGlobalSignature', $UseGlobalSignature);
             $user->setExtendedProp(self::GetName() . '::AllowCreatingIdentities', $AllowCreatingIdentities);
             $user->setExtendedProp(self::GetName() . '::Name', $Name);
@@ -181,16 +176,14 @@ class Module extends \Aurora\System\Module\AbstractModule
             $user->setExtendedProp(self::GetName() . '::Email', $Email);
             $user->setExtendedProp(self::GetName() . '::Optional', $Optional);
             $result = $user->save();
-
         }
 
         return $result;
-
     }
 
     public function onDomainToResponseArray($aArgs, &$mResult)
-	{
-		if (is_array($aArgs) && isset($aArgs['Domain']) && $aArgs['Domain'] instanceof Domain) {
+    {
+        if (is_array($aArgs) && isset($aArgs['Domain']) && $aArgs['Domain'] instanceof Domain) {
             $mResult[self::GetName() . '::SignatureId'] = $aArgs['Domain']->getExtendedProp(self::GetName() . '::SignatureId');
         }
     }
@@ -210,7 +203,6 @@ class Module extends \Aurora\System\Module\AbstractModule
                             if (is_int($signatureId)) {
                                 $signature = GlobalSignature::find($signatureId);
                                 if ($signature) {
-
                                     $mResult['UseSignature'] = true;
                                     $mResult['AllowEditSignature'] = false;
                                     $mResult['AllowUseIdentities'] = $user->getExtendedProp(self::GetName() . '::AllowCreatingIdentities', false);
