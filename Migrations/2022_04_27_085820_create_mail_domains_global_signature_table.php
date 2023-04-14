@@ -19,7 +19,7 @@ class CreateMailDomainsGlobalSignatureTable extends Migration
         });
 
         $prefix = Capsule::connection()->getTablePrefix();
-        Capsule::statement("ALTER TABLE {$prefix}mail_domains_global_signature ADD Signature MEDIUMBLOB NOT NULL");
+        Capsule::connection()->statement("ALTER TABLE {$prefix}mail_domains_global_signature ADD Signature MEDIUMBLOB NOT NULL");
     }
 
     /**
