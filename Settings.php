@@ -19,8 +19,8 @@ class Settings extends \Aurora\System\Module\Settings
     {
         $this->aContainer = [
             "Disabled" => new SettingsProperty(
-		        false,
-		        "bool",
+                false,
+                "bool",
                 null
             ),
         ];

@@ -84,7 +84,7 @@ class Module extends \Aurora\System\Module\AbstractModule
         }
 
         return [
-            'Items' => $query->orderBy('Name', 'asc')->get()->toArray(),
+            'Items' => $query->orderBy('Name', 'asc')->get()->all(),
             'Count' => $count
         ];
     }
