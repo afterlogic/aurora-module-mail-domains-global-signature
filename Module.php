@@ -70,6 +70,7 @@ class Module extends \Aurora\System\Module\AbstractModule
         $query = Models\GlobalSignature::query();
 
         if (!empty($Search)) {
+            $Search = str_replace(['%', '_'], ['\%', '\_'], $Search);
             $query = $query->where('Name', 'Like', '%' . $Search . '%');
         }
 
